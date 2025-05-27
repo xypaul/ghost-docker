@@ -1,0 +1,73 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN environment variable is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - ghost
+    networks:
+      - ghost_network
+
+  ghost:
+    image: ghost:5-alpine
+    restart: always
+    expose:
+      - "2368"
+    environment:
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ${DATABASE_USER:-ghost}
+      database__connection__password: ${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required}
+      database__connection__database: ghost
+      url: https://${DOMAIN:?DOMAIN environment variable is required}
+    volumes:
+      - ghost_content:/var/lib/ghost/content
+    depends_on:
+      - db
+    networks:
+      - ghost_network
+
+  db:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:?DATABASE_ROOT_PASSWORD environment variable is required}
+      MYSQL_USER: ${DATABASE_USER:-ghost}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required}
+      MYSQL_DATABASE: ghost
+      MYSQL_MULTIPLE_DATABASES: activitypub
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - ghost_network
+
+  traffic-analytics:
+    image: ghost/traffic-analytics:edge
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      PROXY_TARGET: https://api.tinybird.co/v0/events
+    networks:
+      - ghost_network
+
+volumes:
+  ghost_content:
+  db_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  ghost_network:
