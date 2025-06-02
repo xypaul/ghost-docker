@@ -84,6 +84,28 @@ services:
     networks:
       - ghost_network
 
+  activitypub:
+    image: ghcr.io/tryghost/activitypub:edge
+    restart: always
+    expose:
+      - "8080"
+      - "9229"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      MYSQL_HOST: db
+      MYSQL_USER: ${DATABASE_USER:-ghost}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required}
+      MYSQL_DATABASE: activitypub
+      USE_MQ: false
+      GCP_BUCKET_NAME: ${ACTIVITYPUB_GCP_BUCKET:?ACTIVITYPUB_GCP_BUCKET environment variable is required}
+    depends_on:
+      - db
+    networks:
+      - ghost_network
+
+  # Suporting Services
+
   tinybird-sync:
     image: ghost:5-alpine
     command: >
@@ -122,6 +144,18 @@ services:
     networks:
       - ghost_network
     tty: true
+
+  activitypub-migrate:
+    image: ghcr.io/tryghost/activitypub-migrations:edge
+    environment:
+      MYSQL_DB: mysql://${DATABASE_USER:-ghost}:${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required}@tcp(db:3306)/activitypub
+    networks:
+      - ghost_network
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: [activitypub]
+    restart: no
 
 volumes:
   ghost_content:
