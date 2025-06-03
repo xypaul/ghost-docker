@@ -13,6 +13,13 @@
         rewrite * {re.analytics_match.2}
         reverse_proxy traffic-analytics:3000
     }
+    
+    # Proxy activitypub requests with any prefix (e.g. /.ghost/activitypub/ or /blog/.ghost/activitypub/)
+    @activitypub_paths path_regexp activitypub_match ^(.*)/\.ghost/activitypub(.*)$
+    handle @activitypub_paths {
+        rewrite * {re.activitypub_match.2}
+        reverse_proxy traffic-analytics:8080
+    }
 
     # Default proxy to Ghost
     handle {
