@@ -89,6 +89,8 @@ services:
   activitypub:
     image: ghcr.io/tryghost/activitypub:edge
     restart: always
+    volumes:
+      - ./gcscreds.json:/home/gcs/gcscreds.json
     expose:
       - "8080"
       - "9229"
@@ -101,6 +103,7 @@ services:
       MYSQL_DATABASE: activitypub
       USE_MQ: false
       GCP_BUCKET_NAME: ${ACTIVITYPUB_GCP_BUCKET:?ACTIVITYPUB_GCP_BUCKET environment variable is required}
+      GOOGLE_APPLICATION_CREDENTIALS: /home/gcs/gcscreds.json
     depends_on:
       - db
     profiles: [activitypub]
