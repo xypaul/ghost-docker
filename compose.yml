@@ -103,6 +103,7 @@ services:
       GCP_BUCKET_NAME: ${ACTIVITYPUB_GCP_BUCKET:?ACTIVITYPUB_GCP_BUCKET environment variable is required}
     depends_on:
       - db
+    profiles: [activitypub]
     networks:
       - ghost_network
 
