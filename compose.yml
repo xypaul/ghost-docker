@@ -49,6 +49,9 @@ services:
       tinybird-deploy:
         condition: service_completed_successfully
         required: false
+      activitypub:
+        condition: service_started
+        required: false
     networks:
       - ghost_network
 
@@ -89,10 +92,10 @@ services:
   activitypub:
     image: ghcr.io/tryghost/activitypub:edge
     restart: always
-    volumes:
-      - ghost_content:/opt/activitypub/content
     expose:
       - "8080"
+    volumes:
+      - ghost_content:/opt/activitypub/content
     environment:
       NODE_ENV: production
       PORT: 8080
