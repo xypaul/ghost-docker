@@ -17,7 +17,8 @@ services:
       - ghost_network
 
   ghost:
-    image: ghost:5-alpine
+    # Do not alter this without updating the Tinybird Sync container as well
+    image: ghost:${GHOST_VERSION:-5-alpine}
     restart: always
     expose:
       - "2368"
@@ -116,7 +117,8 @@ services:
   # Suporting Services
 
   tinybird-sync:
-    image: ghost:5-alpine
+    # Do not alter this without updating the Ghost container as well
+    image: ghost:${GHOST_VERSION:-5-alpine}
     command: >
       sh -c "
         if [ -d /var/lib/ghost/current/core/server/data/tinybird ]; then
