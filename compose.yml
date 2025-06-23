@@ -39,7 +39,7 @@ services:
       tinybird__stats__id: ${TINYBIRD_ID:-}
       tinybird__stats__token: ${TINYBIRD_STATS_TOKEN:-}
     volumes:
-      - ghost_content:/var/lib/ghost/content
+      - ${UPLOAD_LOCATION:-./data/ghost}:/var/lib/ghost/content
     depends_on:
       db:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
       MYSQL_DATABASE: ghost
       MYSQL_MULTIPLE_DATABASES: activitypub
     volumes:
-      - db_data:/var/lib/mysql
+      - ${MYSQL_DATA_LOCATION:-./data/mysql}:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: mysql -u${DATABASE_USER:-ghost} -p${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required} ghost -e 'select 1'
@@ -95,7 +95,7 @@ services:
     expose:
       - "8080"
     volumes:
-      - ghost_content:/opt/activitypub/content
+      - ${UPLOAD_LOCATION:-./data/ghost}:/opt/activitypub/content
     environment:
       NODE_ENV: production
       PORT: 8080
@@ -167,8 +167,6 @@ services:
     restart: no
 
 volumes:
-  ghost_content:
-  db_data:
   caddy_data:
   caddy_config:
   tinybird_files:
