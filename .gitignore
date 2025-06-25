@@ -70,3 +70,6 @@ typings/
 
 # Ghost Docker Custom
 .tinyb
+
+# Where we store docker data by default
+data
