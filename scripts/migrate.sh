@@ -61,16 +61,13 @@ read -rp 'MySQL user to export the current database (must have permission to run
 mysql_user=${mysql_user:-root}
 
 # Stop current installation
-read -rp 'This script is about to stop the current installation whilst it migrates to the new installation. Are you sure you want to continue? (y/n): ' confirm
+read -rp 'This script is about to stop the current installation whilst it migrates to the new installation. Are you sure you want to continue? [y/n]: ' confirm
 
 if [[ "x${confirm}" != "xy" ]]
 then
     echo "Aborting..."
     exit 1
 fi
-
-systemctl stop nginx
-systemctl disable nginx
 
 systemctl stop "ghost_$(jq -r < "${current_location}/.ghost-cli" '.name')"
 systemctl disable "ghost_$(jq -r < "${current_location}/.ghost-cli" '.name')"
@@ -103,8 +100,8 @@ until [ "$(docker compose ps db --format json | jq -r '.Health')" = "healthy" ] 
     ((counter++)) || true
 done
 
-if [ $counter -eq $timeout ]; then
-    echo " Timeout waiting for MySQL to be ready"
+if [[ $counter -eq $timeout ]]; then
+    echo " Timed out waiting for MySQL to be ready, quitting..."
     exit 1
 fi
 
@@ -113,5 +110,21 @@ echo "Importing database..."
 docker compose exec -T db sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $MYSQL_DATABASE' < "${PWD}/data/ghost_import.sql"
 
 # Starting Ghost container
-echo "Starting Ghost and Caddy containers..."
-docker compose up ghost caddy -d
+echo "Starting Ghost and containers..."
+docker compose up ghost -d
+
+read -rp 'Would you like to start Caddy? This will stop your existing Nginx installation. [y/n]: ' confirm
+case "$confirm" in
+    [yY][eE][sS]|[yY])
+        echo "Stopping Nginx..."
+        systemctl stop nginx
+        systemctl disable nginx
+        echo "Starting Caddy..."
+        docker compose up caddy -d
+        echo "Caddy is now running, you can access your site at https://$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2)"
+        ;;
+    *)
+        echo "Ghost is now running inside Docker, you will need to expose it to the internet manually."
+        exit 0
+        ;;
+esac
