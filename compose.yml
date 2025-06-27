@@ -23,6 +23,7 @@ services:
     expose:
       - "2368"
     environment:
+      NODE_ENV: production
       url: https://${DOMAIN:?DOMAIN environment variable is required}
       database__client: mysql
       database__connection__host: db
