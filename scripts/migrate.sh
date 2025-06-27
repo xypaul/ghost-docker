@@ -109,8 +109,25 @@ echo " MySQL is ready!"
 echo "Importing database..."
 docker compose exec -T db sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $MYSQL_DATABASE' < "${PWD}/data/ghost_import.sql"
 
+echo "The migrator will now try and import your existing configuration: "
+
+# Run the config-to-env.js script
+node "${PWD}/scripts/config-to-env.js" "${current_location}/config.production.json"
+
+read -rp 'Are you happy with the configuration? [y/n]: ' confirm
+case "$confirm" in
+    [yY][eE][sS]|[yY])
+        echo "Adding configuration to .env..."
+        node "${PWD}/scripts/config-to-env.js" "${current_location}/config.production.json" >> "${PWD}/.env"
+        ;;
+    *)
+        echo "Skipping, you can manually add the configuration to .env later"
+        echo "Note: Mail configuration is not imported, if you send email you will need to set it up manually"
+        ;;
+esac
+
 # Starting Ghost container
-echo "Starting Ghost and containers..."
+echo "Starting Ghost..."
 docker compose up ghost -d
 
 read -rp 'Would you like to start Caddy? This will stop your existing Nginx installation. [y/n]: ' confirm
