@@ -7,7 +7,6 @@ readonly GHOST_UID=1000
 readonly GHOST_GID=1000
 readonly MYSQL_TIMEOUT=120
 readonly DISK_SPACE_SAFETY_FACTOR=1.5
-readonly SCRIPT_NAME=$(basename "$0")
 readonly TEMP_SQL_FILE="${PWD}/data/ghost_import.sql"
 readonly RECOVERY_SCRIPT="${PWD}/recovery_instructions.sh"
 
@@ -191,8 +190,10 @@ migrate_content() {
 
 # Export and import database
 migrate_database() {
-    local mysql_host=$(jq -r < "${current_location}/config.production.json" '.database.connection.host')
-    local mysql_database=$(jq -r < "${current_location}/config.production.json" '.database.connection.database')
+    local mysql_host
+    local mysql_database
+    mysql_host=$(jq -r < "${current_location}/config.production.json" '.database.connection.host')
+    mysql_database=$(jq -r < "${current_location}/config.production.json" '.database.connection.database')
 
     echo "Exporting database from $mysql_host..."
 
@@ -202,7 +203,8 @@ migrate_database() {
         exit 1
     fi
 
-    local dump_size=$(human_readable $(stat -c%s "$TEMP_SQL_FILE"))
+    local dump_size
+    dump_size=$(human_readable "$(stat -c%s "$TEMP_SQL_FILE")")
     echo "✓ Database exported successfully ($dump_size)"
 
     # Start MySQL container
@@ -282,19 +284,28 @@ main() {
     ghost_service_name="ghost_$(jq -r < "${current_location}/.ghost-cli" '.name')"
 
     # Get database configuration
-    local mysql_host=$(jq -r < "${current_location}/config.production.json" '.database.connection.host')
-    local mysql_database=$(jq -r < "${current_location}/config.production.json" '.database.connection.database')
+    local mysql_host
+    local mysql_database
+    mysql_host=$(jq -r < "${current_location}/config.production.json" '.database.connection.host')
+    mysql_database=$(jq -r < "${current_location}/config.production.json" '.database.connection.database')
 
     # Check disk space
     echo ""
     echo "Checking disk space requirements..."
 
-    local content_size=$(get_size_bytes "${current_location}/content")
-    local content_size_human=$(human_readable "$content_size")
-    local required_space=$(echo "$content_size * $DISK_SPACE_SAFETY_FACTOR" | bc | cut -d'.' -f1)
-    local required_space_human=$(human_readable "$required_space")
-    local available_space=$(df -B1 "${PWD}" | tail -1 | awk '{print $4}')
-    local available_space_human=$(human_readable "$available_space")
+    local content_size
+    local content_size_human
+    local required_space
+    local required_space_human
+    local available_space
+    local available_space_human
+
+    content_size=$(get_size_bytes "${current_location}/content")
+    content_size_human=$(human_readable "$content_size")
+    required_space=$(echo "$content_size * $DISK_SPACE_SAFETY_FACTOR" | bc | cut -d'.' -f1)
+    required_space_human=$(human_readable "$required_space")
+    available_space=$(df -B1 "${PWD}" | tail -1 | awk '{print $4}')
+    available_space_human=$(human_readable "$available_space")
 
     echo "  Content size: ${content_size_human}"
     echo "  Required space: ${required_space_human}"
@@ -398,7 +409,8 @@ main() {
         echo "Starting Caddy..."
         docker compose up caddy -d
 
-        local domain=$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2)
+        local domain
+        domain=$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2)
         echo ""
         echo "✓ Caddy is running!"
         echo "✓ Your site is available at: https://${domain}"
