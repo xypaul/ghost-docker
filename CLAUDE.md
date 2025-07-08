@@ -66,9 +66,12 @@ The repository includes comprehensive migration tools:
 
 - `scripts/migrate.sh` - Main migration script that:
   - Backs up existing Ghost installation
+  - Automatically tries Ghost's database credentials first
+  - Only prompts for alternative credentials if needed
+  - Uses `--no-tablespaces` flag to avoid PROCESS privilege requirements
   - Converts config.json to environment variables
   - Preserves content and database
-  - Creates recovery script
+  - Creates recovery script with clear restoration instructions
   - Sets up Docker Compose environment
 
 - `scripts/config-to-env.js` - Converts Ghost JSON config to .env format
