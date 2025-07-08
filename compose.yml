@@ -74,8 +74,10 @@ services:
       - ${MYSQL_DATA_LOCATION:-./data/mysql}:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: mysql -u${DATABASE_USER:-ghost} -p${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required} ghost -e 'select 1'
+      test: mysqladmin ping -p$$MYSQL_ROOT_PASSWORD -h 127.0.0.1
       interval: 1s
+      start_period: 30s
+      start_interval: 10s
       retries: 120
     networks:
       - ghost_network
