@@ -191,7 +191,8 @@ migrate_content() {
     mkdir -p "$dest"
 
     # Copy with progress
-    rsync --info=progress2 -aHv "$source" "$dest"
+    echo "Copying files..."
+    rsync --info=progress2 -aH "$source" "$dest"
 
     echo ""
     echo "Setting permissions for Ghost container (UID: $GHOST_UID, GID: $GHOST_GID)..."
