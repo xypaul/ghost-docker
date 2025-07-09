@@ -300,6 +300,32 @@ migrate_database() {
     rm -f "$TEMP_SQL_FILE"
 }
 
+# Find Ghost installations in /var/www/
+find_ghost_installations() {
+    local installations=()
+
+    # Search one level deep in /var/www/
+    if [[ -d "/var/www" ]]; then
+        for dir in /var/www/*/; do
+            # Skip if not a directory
+            [[ ! -d "$dir" ]] && continue
+
+            # Remove trailing slash
+            dir="${dir%/}"
+
+            # Check if it's a valid Ghost installation
+            if [[ -f "${dir}/.ghost-cli" ]] && [[ -d "${dir}/content" ]]; then
+                # Additional validation - check if config file exists
+                if [[ -f "${dir}/config.production.json" ]]; then
+                    installations+=("$dir")
+                fi
+            fi
+        done
+    fi
+
+    printf '%s\n' "${installations[@]}"
+}
+
 # Main script starts here
 main() {
     check_prerequisites
@@ -314,8 +340,54 @@ main() {
         exit 0
     fi
 
+    # Search for Ghost installations
+    echo ""
+    echo "Searching for Ghost installations in /var/www/..."
+
+    local ghost_installations=()
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && ghost_installations+=("$line")
+    done < <(find_ghost_installations)
+
     # Get installation location
-    read -rp 'Enter your current Ghost installation path: ' current_location
+    if [[ ${#ghost_installations[@]} -gt 0 ]]; then
+        echo ""
+        echo "Found ${#ghost_installations[@]} Ghost installation(s) in /var/www/:"
+        echo ""
+
+        # Display found installations with numbers
+        local i=1
+        for installation in "${ghost_installations[@]}"; do
+            local site_name
+            site_name=$(basename "$installation")
+            echo "  $i) $site_name (${installation})"
+            ((i++))
+        done
+        echo "  $i) Enter a different path"
+        echo ""
+
+        read -rp "Select an installation (1-$i): " selection
+
+        # Validate selection
+        if [[ "$selection" =~ ^[0-9]+$ ]] && [[ $selection -ge 1 ]] && [[ $selection -le $i ]]; then
+            if [[ $selection -eq $i ]]; then
+                # User wants to enter a different path
+                read -rp 'Enter your current Ghost installation path: ' current_location
+            else
+                # User selected a found installation
+                current_location="${ghost_installations[$((selection-1))]}"
+                echo "Selected: $current_location"
+            fi
+        else
+            echo "Invalid selection"
+            exit 1
+        fi
+    else
+        # No installations found, ask for path directly
+        echo ""
+        echo "No Ghost installations found in /var/www/"
+        read -rp 'Enter your current Ghost installation path: ' current_location
+    fi
 
     if [[ -z "$current_location" ]]; then
         echo "ERROR: Installation path is required"
