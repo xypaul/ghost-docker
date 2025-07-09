@@ -161,7 +161,7 @@ WHAT WILL HAPPEN:
   ✓ Copy content directory to Docker mount
   ✓ Export and import your database to a Docker based MySQL instance
   ✓ Start Ghost in Docker container
-  ✓ Optionally configure Caddy for HTTPS
+  ✓ Optionally configure Caddy Webserver for HTTPS
 
 WHAT WONT HAPPEN:
   ✓ No data will be deleted
@@ -431,19 +431,19 @@ main() {
     # Final confirmation before stopping Ghost
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚠️  YOUR SITE WILL NOW GO OFFLINE FOR MIGRATION"
+    echo "⚠️  YOUR SITE WILL BE UNAVAILABLE DURING MIGRATION"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "The next steps will:"
     echo "  1. Stop your Ghost service"
     echo "  2. Migrate your content and database"
-    echo "     a. Your content directory will now be at ${PWD}/data/ghost/"
-    echo "     b. Your MySQL database will now be at ${PWD}/data/mysql/"
+    echo "     a. Your new content directory will be at ${PWD}/data/ghost/"
+    echo "     b. Your new MySQL database will be at ${PWD}/data/mysql/"
     echo "  3. Start Ghost in Docker"
     echo ""
     echo "If anything goes wrong, run: bash $RECOVERY_SCRIPT"
     echo ""
-    read -rp 'Continue with migration? This will take your site offline. (y/n): ' confirm
+    read -rp 'Continue with migration? This will make your site unavailable. (y/n): ' confirm
 
     if [[ "${confirm,,}" != "y" ]]; then
         echo "Migration cancelled."
@@ -498,7 +498,7 @@ main() {
 
     # Caddy setup
     echo ""
-    read -rp 'Start Caddy for automatic HTTPS? This will stop Nginx. (y/n): ' confirm
+    read -rp 'Start Caddy Webserver for automatic HTTPS? This will stop Nginx. (y/n): ' confirm
     if [[ "${confirm,,}" == "y" ]]; then
         echo "Stopping Nginx..."
         systemctl stop nginx || true
@@ -510,7 +510,7 @@ main() {
         local domain
         domain=$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2)
         echo ""
-        echo "✓ Caddy is running!"
+        echo "✓ Caddy Webserver is running!"
         echo "✓ Your site is available at: https://${domain}"
     else
         echo ""
@@ -529,6 +529,13 @@ main() {
     echo "Your Ghost site is now running in Docker."
     echo "Original installation files remain at: $current_location"
     echo "Your existing MySQL instance is still running at: $mysql_host"
+    echo ""
+    echo "Once you're checked over the migration you can remove the old installation files and database by running:"
+    echo ""
+    echo "  rm -r $current_location/"
+    echo "  mysql -e 'DROP DATABASE IF EXISTS ${mysql_database}'"
+    echo ""
+    echo "This will remove the old Ghost CLI and Ghost 5.x installation"
     echo ""
     echo "Next steps:"
     echo "  - Monitor logs: docker compose logs -f ghost"
