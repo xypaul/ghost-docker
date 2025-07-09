@@ -497,8 +497,8 @@ main() {
     read -rp 'Start Caddy Webserver for automatic HTTPS? This will stop Nginx. (y/n): ' confirm
     if [[ "${confirm,,}" == "y" ]]; then
         echo "Stopping Nginx..."
-        systemctl stop nginx || true
-        systemctl disable nginx || true
+        systemctl stop nginx -q || true
+        systemctl disable nginx -q || true
 
         echo "Starting Caddy..."
         docker compose up caddy -d
