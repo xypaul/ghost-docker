@@ -478,17 +478,13 @@ main() {
     # Import configuration
     echo ""
     echo "Importing configuration from existing installation..."
+    echo ""
     node "${PWD}/scripts/config-to-env.js" "${current_location}/config.production.json"
+    echo ""
 
-    read -rp 'Import these settings to .env? (y/n): ' confirm
-    if [[ "${confirm,,}" == "y" ]]; then
-        echo -e '\n# Configuration imported from existing Ghost install' >> "${PWD}/.env"
-        node "${PWD}/scripts/config-to-env.js" "${current_location}/config.production.json" >> "${PWD}/.env"
-        echo "✓ Configuration imported"
-    else
-        echo "Skipped configuration import"
-        echo "Note: You'll need to manually configure mail settings if required"
-    fi
+    echo -e "\n# Configuration imported from existing Ghost install at ${current_location}" >> "${PWD}/.env"
+    node "${PWD}/scripts/config-to-env.js" "${current_location}/config.production.json" >> "${PWD}/.env"
+    echo "✓ Configuration imported"
 
     # Start Ghost
     echo ""
