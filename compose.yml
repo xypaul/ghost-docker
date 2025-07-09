@@ -23,7 +23,7 @@ services:
     image: ghost:${GHOST_VERSION:-5-alpine}
     restart: always
     expose:
-      - "2368"
+      - "127.0.0.1:${GHOST_PORT:-2368}:2368"
     # This is required to import current config when migrating
     env_file:
       - .env

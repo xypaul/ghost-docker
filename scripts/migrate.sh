@@ -509,9 +509,11 @@ main() {
         echo "✓ Caddy Webserver is running!"
         echo "✓ Your site is available at: https://${domain}"
     else
+        local ghost_port
+        ghost_port=$(grep 'GHOST_PORT' "${PWD}/.env" | cut -d '=' -f 2)
         echo ""
-        echo "✓ Ghost is running on port 2368"
-        echo "  Configure your reverse proxy to forward traffic to it"
+        echo "✓ Ghost is now running"
+        echo "  To finish migration, configure your webserver to forward traffic to 127.0.0.1:${ghost_port}"
     fi
 
     # Success! Remove recovery script
