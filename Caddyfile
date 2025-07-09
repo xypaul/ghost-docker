@@ -14,9 +14,13 @@
         reverse_proxy traffic-analytics:3000
     }
     
-    # Proxy activitypub requests with any prefix (e.g. /.ghost/activitypub/ or /blog/.ghost/activitypub/)
-    @activitypub_paths path_regexp activitypub_match ^(.*)/\.ghost/activitypub(.*)$
+    # Proxy activitypub requests /.ghost/activitypub/
+    @activitypub_paths path_regexp activitypub_match ^/\.ghost/activitypub(.*)$
     handle @activitypub_paths {
+        reverse_proxy activitypub:8080
+    }
+
+    handle /.well-known/webfinger {
         reverse_proxy activitypub:8080
     }
 
