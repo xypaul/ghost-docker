@@ -208,7 +208,7 @@ test_mysql_dump() {
     local password=$4
 
     # Try a minimal dump to test permissions
-    if mysqldump --no-tablespaces --no-data -h"$host" -u"$user" -p"$password" "$database" >/dev/null 2>&1; then
+    if MYSQL_PWD="$password" mysqldump --no-tablespaces --no-data -h"$host" -u"$user" "$database" >/dev/null 2>&1; then
         return 0
     else
         return 1
@@ -227,7 +227,7 @@ migrate_database() {
     # Export database with proper error handling
     local dump_output
     local dump_status
-    dump_output=$(mysqldump --no-tablespaces -h"$mysql_host" -u"$mysql_user" -p"$mysql_password" "$mysql_database" 2>&1 > "$TEMP_SQL_FILE")
+    dump_output=$(MYSQL_PWD="$mysql_password" mysqldump --no-tablespaces -h"$mysql_host" -u"$mysql_user" "$mysql_database" 2>&1 > "$TEMP_SQL_FILE")
     dump_status=$?
 
     # Check for errors in output (mysqldump may return 0 even with some errors)
@@ -286,7 +286,9 @@ migrate_database() {
 
     # Import database
     echo "Importing database into Docker MySQL..."
-    if ! docker compose exec -T db sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $MYSQL_DATABASE' < "$TEMP_SQL_FILE"; then
+    local MYSQL_ROOT_PASSWORD
+    MYSQL_ROOT_PASSWORD=$(grep DATABASE_ROOT_PASSWORD "$PWD/.env" | cut -d '=' -f 2-)
+    if ! docker compose exec -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" -T db sh -c 'exec mysql -uroot $MYSQL_DATABASE' < "$TEMP_SQL_FILE"; then
         echo "ERROR: Failed to import database"
         exit 1
     fi
@@ -504,13 +506,13 @@ main() {
         docker compose up caddy -d
 
         local domain
-        domain=$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2)
+        domain=$(grep 'DOMAIN' "${PWD}/.env" | cut -d '=' -f 2-)
         echo ""
         echo "✓ Caddy Webserver is running!"
         echo "✓ Your site is available at: https://${domain}"
     else
         local ghost_port
-        ghost_port=$(grep 'GHOST_PORT' "${PWD}/.env" | cut -d '=' -f 2)
+        ghost_port=$(grep 'GHOST_PORT' "${PWD}/.env" | cut -d '=' -f 2-)
         echo ""
         echo "✓ Ghost is now running"
         echo "  To finish migration, configure your webserver to forward traffic to 127.0.0.1:${ghost_port}"
