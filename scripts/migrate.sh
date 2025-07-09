@@ -264,10 +264,6 @@ migrate_database() {
     dump_size=$(human_readable "$(stat -c%s "$TEMP_SQL_FILE")")
     echo "✓ Database exported successfully ($dump_size)"
 
-    # Start MySQL container
-    echo "Starting MySQL container..."
-    docker compose up db -d
-
     # Wait for MySQL to be ready
     echo -n "Waiting for MySQL container to be ready"
     local counter=0
@@ -541,6 +537,10 @@ main() {
 
     systemctl disable "$ghost_service_name" 2>/dev/null || true
     echo "✓ Ghost service stopped"
+
+    # Start MySQL container
+    echo "Starting MySQL container for migration..."
+    docker compose up db -d
 
     # Migrate content
     echo ""
