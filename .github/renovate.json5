@@ -1,16 +1,13 @@
 {
 	$schema: "https://docs.renovatebot.com/renovate-schema.json",
 	extends: [
-		":enableRenovate",
-		"config:recommended",
-		":dependencyDashboard",
+		"config:best-practices",
+		":disableRateLimiting",
+		":automergeBranch",
+		":pinDependencies",
 		":separatePatchReleases",
-		"docker:pinDigests",
 	],
-	enabled: true,
-	dependencyDashboard: true,
 	suppressNotifications: ["prIgnoreNotification"],
-	automergeType: "branch",
 	packageRules: [
 		{
 			description: "Auto-merge initial digest pinning",
