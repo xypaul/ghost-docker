@@ -13,10 +13,10 @@
         rewrite * {re.analytics_match.2}
         reverse_proxy traffic-analytics:3000
     }
-    
+
+    # ActivityPub
     # Proxy activitypub requests /.ghost/activitypub/
-    @activitypub_paths path_regexp activitypub_match ^/\.ghost/activitypub(.*)$
-    handle @activitypub_paths {
+    handle /.ghost/activitypub/* {
         reverse_proxy activitypub:8080
     }
 
@@ -24,7 +24,11 @@
         reverse_proxy activitypub:8080
     }
 
-    # Default proxy to Ghost
+    handle /.well-known/nodeinfo {
+        reverse_proxy activitypub:8080
+    }
+
+    # Default proxy everything else to Ghost
     handle {
         reverse_proxy ghost:2368
     }
