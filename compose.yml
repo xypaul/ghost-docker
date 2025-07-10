@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/main/schema/compose-spec.json
 services:
   caddy:
-    image: caddy:2-alpine
+    image: caddy:2.10.0-alpine
     restart: always
     ports:
       - "80:80"
@@ -59,7 +59,7 @@ services:
       - ghost_network
 
   db:
-    image: mysql:8.0
+    image: mysql:8.0.42
     restart: always
     expose:
       - "3306"
