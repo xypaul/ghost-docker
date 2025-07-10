@@ -5,7 +5,6 @@
 		"config:recommended",
 		":dependencyDashboard",
 		":separatePatchReleases",
-		"docker:enableMajor",
 		"docker:pinDigests",
 	],
 	enabled: true,
