@@ -28,5 +28,11 @@
 			],
 			pinDigests: false,
 		},
+		{
+			description: "Restrict MySQL to patch updates only within 8.0",
+			matchDatasources: ["docker", "docker-compose"],
+			matchPackageNames: ["mysql"],
+			allowedVersions: "~8.0",
+		},
 	],
 }
