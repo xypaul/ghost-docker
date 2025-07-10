@@ -1,0 +1,33 @@
+{
+	$schema: "https://docs.renovatebot.com/renovate-schema.json",
+	extends: [
+		":enableRenovate",
+		"config:recommended",
+		":dependencyDashboard",
+		":separatePatchReleases",
+		"docker:enableMajor",
+		"docker:pinDigests",
+	],
+	enabled: true,
+	dependencyDashboard: true,
+	suppressNotifications: ["prIgnoreNotification"],
+	automergeType: "branch",
+	packageRules: [
+		{
+			description: "Auto-merge initial digest pinning",
+			matchDatasources: ["docker", "github-tags"],
+			matchUpdateTypes: ["pinDigest"],
+			automerge: true,
+		},
+		{
+			description: "Don't pin Ghost images till we have v1",
+			matchDatasources: ["docker", "docker-compose"],
+			matchPackageNames: [
+			    "ghost",
+				"ghost/traffic-analytics",
+				"ghcr.io/tryghost/activitypub",
+			],
+			pinDigests: false,
+		},
+	],
+}
