@@ -9,6 +9,7 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN:?DOMAIN environment variable is required}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
       ACTIVITYPUB_TARGET: ${ACTIVITYPUB_TARGET:-https://ap.ghost.org}
     volumes:
       - ./caddy:/etc/caddy
