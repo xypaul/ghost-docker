@@ -54,5 +54,5 @@
 # If you're want to enable ActivityPub you _must_ enable this redirect
 # REPLACE_ME {
 # 	import snippets/Logging
-# 	redir https://REPLACE_ME{uri}
+# 	redir https://{$DOMAIN}{uri}
 # }
