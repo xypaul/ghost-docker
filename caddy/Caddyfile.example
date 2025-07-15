@@ -31,8 +31,16 @@
 	}
 }
 
-# Redirect www to non-www (optional)
-www.{$DOMAIN} {
-	import snippets/Logging
-	redir https://{$DOMAIN}{uri}
-}
+# If you want to redirect the www variant of your domain to the non-www varient uncomment the below 4 lines
+# Note: You must have DNS setup correctly for this to work
+# www.{$DOMAIN} {
+# 	import snippets/Logging
+# 	redir https://{$DOMAIN}{uri}
+# }
+
+# If you want to redirect the non-www variant of your domain to the www varient uncomment the below 4 lines and replace REPLACE_ME with your domain
+# Note: You must have DNS setup correctly for this to work
+# REPLACE_ME {
+# 	import snippets/Logging
+# 	redir https://REPLACE_ME{uri}
+# }
