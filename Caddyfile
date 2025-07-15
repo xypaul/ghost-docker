@@ -17,15 +17,15 @@
     # ActivityPub
     # Proxy activitypub requests /.ghost/activitypub/
     handle /.ghost/activitypub/* {
-        reverse_proxy activitypub:8080
+        reverse_proxy https://ap.ghost.org
     }
 
     handle /.well-known/webfinger {
-        reverse_proxy activitypub:8080
+        reverse_proxy https://ap.ghost.org
     }
 
     handle /.well-known/nodeinfo {
-        reverse_proxy activitypub:8080
+        reverse_proxy https://ap.ghost.org
     }
 
     # Default proxy everything else to Ghost
