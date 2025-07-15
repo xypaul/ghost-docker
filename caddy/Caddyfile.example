@@ -51,6 +51,7 @@
 
 # If you want to redirect the non-www variant of your domain to the www varient uncomment the below 4 lines and replace REPLACE_ME with your domain
 # Note: You must have DNS setup correctly for this to work
+# If you're want to enable ActivityPub you _must_ enable this redirect
 # REPLACE_ME {
 # 	import snippets/Logging
 # 	redir https://REPLACE_ME{uri}
