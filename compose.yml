@@ -119,7 +119,10 @@ services:
       LOCAL_STORAGE_PATH: /opt/activitypub/content/images/activitypub
       LOCAL_STORAGE_HOSTING_URL: https://${DOMAIN}/content/images/activitypub
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      activitypub-migrate:
+        condition: service_completed_successfully
     profiles: [activitypub]
     networks:
       - ghost_network
