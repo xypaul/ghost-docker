@@ -9,7 +9,7 @@ services:
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
       ACTIVITYPUB_TARGET: ${ACTIVITYPUB_TARGET:-https://ap.ghost.org}
     ports:
-      - "8080:80" 
+      - "18080:80" 
     volumes:
       - ./caddy:/etc/caddy
       - caddy_data:/data
