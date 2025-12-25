@@ -7,8 +7,6 @@ services:
     image: ghost:${GHOST_VERSION:-6-alpine}
     restart: always
     # This is required to import current config when migrating
-    env_file:
-      - .env
     environment:
       NODE_ENV: production
       url: https://${DOMAIN:?DOMAIN environment variable is required}
