@@ -170,6 +170,11 @@ services:
     networks:
       - ghost_network
     tty: true
+    # One-shot job: deploys schema to Tinybird then exits 0. Without
+    # `restart: no`, Coolify's default `unless-stopped` policy restarts it
+    # in a loop, and Ghost's `service_completed_successfully` depends_on
+    # never resolves so Ghost stays in `Created`.
+    restart: no
 
   activitypub-migrate:
     image: ghcr.io/tryghost/activitypub-migrations:1.1.0@sha256:b3ab20f55d66eb79090130ff91b57fe93f8a4254b446c2c7fa4507535f503662
