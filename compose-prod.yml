@@ -85,6 +85,21 @@ services:
     profiles: [analytics]
     networks:
       - ghost_network
+    labels:
+      # Route `https://${DOMAIN}/.ghost/analytics/*` to this container,
+      # stripping the `/.ghost/analytics` prefix so the request lands as
+      # `/api/v1/page_hit` (what the service expects). Mirrors the Caddy
+      # snippet in caddy/snippets/TrafficAnalytics. Without this, Traefik
+      # sends every path to Ghost and the tracker POST 404s.
+      - traefik.enable=true
+      - traefik.docker.network=${COOLIFY_RESOURCE_UUID:-}
+      - 'traefik.http.routers.analytics.rule=Host(`${DOMAIN}`) && PathPrefix(`/.ghost/analytics/`)'
+      - traefik.http.routers.analytics.entrypoints=https
+      - traefik.http.routers.analytics.tls=true
+      - traefik.http.routers.analytics.priority=100
+      - traefik.http.routers.analytics.middlewares=strip-analytics-prefix
+      - traefik.http.middlewares.strip-analytics-prefix.stripprefix.prefixes=/.ghost/analytics
+      - traefik.http.services.analytics.loadbalancer.server.port=3000
 
   activitypub:
     image: ghcr.io/tryghost/activitypub:1.1.0@sha256:39c212fe23603b182d68e67d555c6b9b04b1e57459dfc0bef26d6e4980eb04d1
@@ -110,6 +125,20 @@ services:
     profiles: [activitypub]
     networks:
       - ghost_network
+    labels:
+      # Route `https://${DOMAIN}/.ghost/activitypub/*`, `/.well-known/webfinger`,
+      # and `/.well-known/nodeinfo` to this container. Mirrors the Caddy snippet
+      # in caddy/snippets/ActivityPub. Without this, Traefik sends those paths
+      # to Ghost and the admin Network page shows "Loading interrupted".
+      # Note: no prefix-strip — ActivityPub expects the `/.ghost/activitypub/`
+      # prefix in the request path (matches the upstream's own router).
+      - traefik.enable=true
+      - traefik.docker.network=${COOLIFY_RESOURCE_UUID:-}
+      - 'traefik.http.routers.activitypub.rule=Host(`${DOMAIN}`) && (PathPrefix(`/.ghost/activitypub/`) || Path(`/.well-known/webfinger`) || Path(`/.well-known/nodeinfo`))'
+      - traefik.http.routers.activitypub.entrypoints=https
+      - traefik.http.routers.activitypub.tls=true
+      - traefik.http.routers.activitypub.priority=100
+      - traefik.http.services.activitypub.loadbalancer.server.port=8080
 
   # Supporting Services
 
