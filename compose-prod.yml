@@ -39,6 +39,11 @@ services:
       - ghost_network
     expose:
       - 2368
+    labels:
+      # Pin Traefik to the Coolify-injected project network so it doesn't
+      # randomly pick `ghost_network` (which Traefik isn't joined to) and 504
+      # every request. COOLIFY_RESOURCE_UUID is set by Coolify at deploy time.
+      - traefik.docker.network=${COOLIFY_RESOURCE_UUID:-}
 
   db:
     image: mysql:8.0.44@sha256:f37951fc3753a6a22d6c7bf6978c5e5fefcf6f31814d98c582524f98eae52b21
