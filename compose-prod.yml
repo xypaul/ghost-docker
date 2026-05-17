@@ -5,6 +5,7 @@ services:
   ghost:
     # Do not alter this without updating the Tinybird Sync container as well
     image: ghost:${GHOST_VERSION:-6-alpine}
+    pull_policy: always
     restart: always
     # This is required to import current config when migrating
     environment:
