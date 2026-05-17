@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a comprehensive Docker Compose setup for running Ghost CMS in production with automatic HTTPS, optional analytics, and ActivityPub support. The repository orchestrates multiple services including Ghost, MySQL, Caddy (reverse proxy), and optional Tinybird analytics and ActivityPub federation.
 
+**This fork deploys via [Coolify](https://coolify.io/) (Traefik proxy), not the upstream Caddy.** Before changing the compose, the deployment, or anything routing-related, READ [`COOLIFY.md`](./COOLIFY.md) — it documents the Coolify+Traefik integration, the required `traefik.docker.network` label, the `MYSQL_MULTIPLE_DATABASES`-only-on-fresh-init quirk, why one-shot services need `restart: no`, and where things live on the production server.
+
 ## Architecture
 
 The project uses Docker Compose to orchestrate these services:
