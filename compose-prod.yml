@@ -39,6 +39,15 @@ services:
       - ghost_network
     expose:
       - 2368
+    # Lets Coolify (and depends_on) see when Ghost is actually serving. Ghost
+    # redirects plain HTTP to its https:// url, so claim the proxy already
+    # terminated TLS, as Traefik does for real traffic.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "-T", "5", "--header=X-Forwarded-Proto: https", "http://127.0.0.1:2368/ghost/api/admin/site/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
     labels:
       # Pin Traefik to the Coolify-injected project network so it doesn't
       # randomly pick `ghost_network` (which Traefik isn't joined to) and 504
