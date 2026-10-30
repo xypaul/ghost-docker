@@ -19,6 +19,7 @@ services:
       tinybird__tracker__endpoint: https://${DOMAIN:?DOMAIN environment variable is required}/.ghost/analytics/api/v1/page_hit
       tinybird__adminToken: ${TINYBIRD_ADMIN_TOKEN:-}
       tinybird__workspaceId: ${TINYBIRD_WORKSPACE_ID:-}
+      tinybird__sync_auth_key: ${TINYBIRD_SYNC_AUTH:-}
       tinybird__tracker__datasource: analytics_events
       tinybird__stats__endpoint: ${TINYBIRD_API_URL:-https://api.tinybird.co}
     volumes:
@@ -55,7 +56,7 @@ services:
       - traefik.docker.network=${COOLIFY_RESOURCE_UUID:-}
 
   db:
-    image: mysql:8.0.44@sha256:f37951fc3753a6a22d6c7bf6978c5e5fefcf6f31814d98c582524f98eae52b21
+    image: mysql:8.0.46@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
     restart: always
     expose:
       - "3306"
@@ -70,15 +71,15 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: mysqladmin ping -p$$MYSQL_ROOT_PASSWORD -h 127.0.0.1
-      interval: 1s
-      start_period: 30s
-      start_interval: 10s
-      retries: 120
+      interval: 30s
+      start_period: 60s
+      start_interval: 2s
+      retries: 5
     networks:
       - ghost_network
 
   traffic-analytics:
-    image: ghost/traffic-analytics:1.0.226@sha256:4678eaab689b96e03883dcd09895062413e31a07ced611cd10926b57ef81d8fa
+    image: ghost/traffic-analytics:1.0.511@sha256:67300221945e4faeb7a4b0765649b630b3859acd844a35123abe99db0596d4f7
     restart: always
     expose:
       - "3000"
@@ -90,6 +91,7 @@ services:
       SALT_STORE_TYPE: ${SALT_STORE_TYPE:-file}
       SALT_STORE_FILE_PATH: /data/salts.json
       TINYBIRD_TRACKER_TOKEN: ${TINYBIRD_TRACKER_TOKEN:-}
+      TINYBIRD_SYNC_AUTH: ${TINYBIRD_SYNC_AUTH:-}
       LOG_LEVEL: debug
     profiles: [analytics]
     networks:
@@ -111,7 +113,7 @@ services:
       - traefik.http.services.analytics.loadbalancer.server.port=3000
 
   activitypub:
-    image: ghcr.io/tryghost/activitypub:1.2.2@sha256:128f0d08d872930b4ab37c9fc1fe8042fefd44622316b05f3885bd068be7cc43
+    image: ghcr.io/tryghost/activitypub:1.2.16@sha256:b440548b8a87eaf70c9440d4b157beee4898b85ba4294509926517a85e7573c7
     restart: always
     expose:
       - "8080"
@@ -215,7 +217,7 @@ services:
     restart: no
 
   activitypub-migrate:
-    image: ghcr.io/tryghost/activitypub-migrations:1.2.2@sha256:2af8a0726ac4362cdcab59c308ed612140478d43011ec8d3475bb2634b96d108
+    image: ghcr.io/tryghost/activitypub-migrations:1.2.16@sha256:1ecd26490dc668c6e5e467f85ea2e40d8bfc033bae8eb70f5378a24a27bb75d6
     environment:
       MYSQL_DB: mysql://${DATABASE_USER:-ghost}:${DATABASE_PASSWORD:?DATABASE_PASSWORD environment variable is required}@tcp(db:3306)/activitypub
     networks:
